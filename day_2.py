@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import Optional
 
 
 example_levels = [
@@ -14,8 +15,6 @@ levels = []
 
 with open('data/day_2.txt', 'r') as f:
     for line in f:
-        # if len(levels) < 10:
-        #     levels.append(line.split(' '))
         levels.append(line.split(' '))
 
 for level in levels:
@@ -23,7 +22,7 @@ for level in levels:
         level[i] = int(value.replace("\n",""))
 
 
-def level_checker(level: list[int]):
+def level_checker(level: list[int], second_try: Optional[bool] = False):
 
     increasing = True
     if level[0] - level[1] > 0:
@@ -46,9 +45,27 @@ def level_checker(level: list[int]):
                 value - 3]
 
 
-        print(level[i+1], value_list)
         if level[i+1] not in value_list:
-            return False
+            if second_try:
+                return False
+
+            remove_first_term = deepcopy(level)
+            del remove_first_term[i - 1]
+            try_first = level_checker(remove_first_term, True)
+
+            remove_second_term = deepcopy(level)
+            del remove_second_term[i]
+            try_second = level_checker(remove_second_term, True)
+
+            remove_third_term = deepcopy(level)
+            del remove_third_term[i + 1]
+            try_third = level_checker(remove_third_term, True)
+
+
+            if try_first or try_second or try_third:
+                return True
+            else:
+                return False
 
 
 
