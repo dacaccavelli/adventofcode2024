@@ -1,6 +1,15 @@
 from copy import deepcopy
 
 
+example_levels = [
+[7, 6, 4, 2, 1],
+[1, 2, 7, 8, 9],
+[9, 7, 6, 2, 1],
+[1, 3, 2, 4, 5],
+[8, 6, 4, 4, 1],
+[1, 3, 6, 7, 9]
+]
+
 levels = []
 
 with open('data/day_2.txt', 'r') as f:
@@ -14,62 +23,39 @@ for level in levels:
         level[i] = int(value.replace("\n",""))
 
 
-def test_level(level: list[int], retry:bool = False):
-    increase = False
-    decrease = False
+def level_checker(level: list[int]):
 
-    def remove_fail(level: list, retry, index):
-        if not retry:
-            if index == len(level) -1:
-                return True
-            copy = deepcopy(level)
-            copy.pop(index)
-            if test_level(copy, True):
-                return True
-            else:
-                copy = deepcopy(level)
-                copy.pop(index-1)
-                return test_level(copy, True)
-        return False
+    increasing = True
+    if level[0] - level[1] > 0:
+        increasing = False
 
 
-    for i, value in enumerate(level[:-1]):
-        next_value = level[i+1]
+    for i, value in enumerate(level):
+        if i == len(level) - 1:
+            return True
 
-        if value == next_value:
-            if remove_fail(level, retry, i+1):
-                return True
-            return False
-        elif abs(value - next_value) > 3:
-            if remove_fail(level, retry, i+1):
-                return True
-            return False
-        elif value < next_value:
-            if decrease:
-                if remove_fail(level, retry, i+1):
-                    return True
-                return False
-            increase = True
+        if increasing:
+            value_list = [
+                value + 1,
+                value + 2,
+                value + 3]
         else:
-            if increase:
-                if remove_fail(level, retry, i+1):
-                    return True
-                return False
-            decrease = True
-    return True
+            value_list = [
+                value - 1,
+                value - 2,
+                value - 3]
 
 
-# print(test_level([75, 76, 80, 83, 85, 87, 92]))
+        print(level[i+1], value_list)
+        if level[i+1] not in value_list:
+            return False
+
+
 
 safe_count = 0
 for level in levels:
-    response = test_level(level)
-    print(level)
-    print(response)
-    print('-------------------')
-
-    if response:
+    if level_checker(level):
         safe_count += 1
-    else:
-        pass
+
+
 print(safe_count)
