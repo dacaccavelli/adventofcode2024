@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 # example_updates = ['47|53',
 # '97|13',
 # '97|61',
@@ -40,7 +43,6 @@ for line in file_content:
         continue
 
     if not updates:
-        print(len(line))
         before, after = line.split('|')
         before = int(before)
         after = int(after)
@@ -52,16 +54,25 @@ for line in file_content:
         failed_line = False
         past_pages = []
         updated_pages = [int(x) for x in line.split(',')]
-        for page in updated_pages:
-            if not failed_line:
-                if int(page) in rules_dict:
-                    for past_page in past_pages:
-                        if past_page in rules_dict[int(page)]:
-                            failed_line = True
+        # TODO: looks like the old indexes are being used for each new iteration, probably due to updating the item being iterated over.
+        # TODO: I attempted to fix this with the deepcopy, but its still not the right answer, giving up for now
+        copy_pages = deepcopy(updated_pages)
+        for old_index, page in enumerate(updated_pages):
+            if int(page) in rules_dict:
+                for new_index, past_page in enumerate(past_pages):
+                    if past_page in rules_dict[int(page)]:
+                        failed_line = True
+                        copy_index = copy_pages.index(page)
+                        past_page_index = copy_pages.index(past_page)
+                        copy_pages.insert(past_page_index, copy_pages.pop(copy_index))
+                        print(copy_pages)
 
-
-                past_pages.append(page)
-        if not failed_line:
-            total += updated_pages[int((len(updated_pages)-1)/2)]
+            past_pages.append(page)
+        if failed_line:
+            print(copy_pages)
+            total += copy_pages[int((len(copy_pages)-1)/2)]
 
 print(total)
+
+# 5259 is too high
+# 4729 is too high
